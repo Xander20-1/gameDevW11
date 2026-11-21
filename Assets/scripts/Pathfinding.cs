@@ -30,7 +30,13 @@ public class Pathfinding : MonoBehaviour
         Node startNode = grid.NodeFromWorldPoint(startPosition);
         Node targetNode = grid.NodeFromWorldPoint(targetPosition);
 
-        if (!startNode.walkable || !targetNode.walkable)
+        if (!startNode.walkable)
+            startNode = grid.GetNearestWalkableNode(startNode);
+
+        if (!targetNode.walkable)
+            targetNode = grid.GetNearestWalkableNode(targetNode);
+
+        if (startNode == null || targetNode == null)
         {
             grid.path = null;
             return;

@@ -7,8 +7,11 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private float shootRange = 100f;
     [SerializeField] private AudioClip shootSound;
     [SerializeField] private AudioSource audioSource;
+    [SerializeField] private TMPro.TMP_Text shootingInfo;
 
     private Camera playerCamera;
+    private int shotsFired;
+    private int zombieHits;
 
     private void Awake()
     {
@@ -26,6 +29,7 @@ public class PlayerShooting : MonoBehaviour
     private void Start()
     {
         playerCamera = Camera.main;
+        UpdateShootingInfo();
     }
 
     private void Update()
@@ -39,6 +43,8 @@ public class PlayerShooting : MonoBehaviour
 
     private void Shoot()
     {
+        shotsFired++;
+
         if (audioSource != null && shootSound != null)
         {
             audioSource.PlayOneShot(shootSound);
@@ -64,9 +70,18 @@ public class PlayerShooting : MonoBehaviour
             ZombieAI zombie = hit.collider.GetComponentInParent<ZombieAI>();
             if (zombie != null)
             {
+                zombieHits++;
                 zombie.Alert();
                 Debug.Log("Zombie tertembak, mulai mengejar hero!");
             }
         }
+
+        UpdateShootingInfo();
+    }
+
+    private void UpdateShootingInfo()
+    {
+        if (shootingInfo != null)
+            shootingInfo.text = "Shots fired: " + shotsFired + "\nZombie hits: " + zombieHits;
     }
 }

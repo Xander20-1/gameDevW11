@@ -63,19 +63,21 @@ public class GridManager : MonoBehaviour
 
     public Node NodeFromWorldPoint(Vector3 worldPosition)
     {
-        float percentX =
-            (worldPosition.x + gridWorldSize.x / 2 - transform.position.x)
-            / gridWorldSize.x;
+        Vector3 worldBottomLeft =
+            transform.position
+            - Vector3.right * gridWorldSize.x / 2
+            - Vector3.forward * gridWorldSize.y / 2;
 
-        float percentY =
-            (worldPosition.z + gridWorldSize.y / 2 - transform.position.z)
-            / gridWorldSize.y;
+        int x = Mathf.FloorToInt(
+            (worldPosition.x - worldBottomLeft.x) / nodeDiameter
+        );
 
-        percentX = Mathf.Clamp01(percentX);
-        percentY = Mathf.Clamp01(percentY);
+        int y = Mathf.FloorToInt(
+            (worldPosition.z - worldBottomLeft.z) / nodeDiameter
+        );
 
-        int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
-        int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
+        x = Mathf.Clamp(x, 0, gridSizeX - 1);
+        y = Mathf.Clamp(y, 0, gridSizeY - 1);
 
         return grid[x, y];
     }
@@ -103,6 +105,52 @@ public class GridManager : MonoBehaviour
         }
 
         return neighbours;
+    }
+
+    public Node GetNearestWalkableNode(Node node)
+    {
+        if (node.walkable)
+            return node;
+
+        for (int radius = 1; radius < Mathf.Max(gridSizeX, gridSizeY); radius++)
+        {
+            Node best = null;
+            int bestDistance = int.MaxValue;
+
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int y = -radius; y <= radius; y++)
+                {
+                    if (Mathf.Abs(x) != radius && Mathf.Abs(y) != radius)
+                        continue;
+
+                    int checkX = node.gridX + x;
+                    int checkY = node.gridY + y;
+
+                    if (checkX < 0 || checkX >= gridSizeX ||
+                        checkY < 0 || checkY >= gridSizeY)
+                        continue;
+
+                    Node candidate = grid[checkX, checkY];
+
+                    if (!candidate.walkable)
+                        continue;
+
+                    int distance = x * x + y * y;
+
+                    if (distance < bestDistance)
+                    {
+                        bestDistance = distance;
+                        best = candidate;
+                    }
+                }
+            }
+
+            if (best != null)
+                return best;
+        }
+
+        return null;
     }
 
     void OnDrawGizmos()
