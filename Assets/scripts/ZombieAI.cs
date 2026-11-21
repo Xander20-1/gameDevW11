@@ -72,7 +72,9 @@ public class ZombieAI : MonoBehaviour
         else
         {
             agent.isStopped = false;
-            agent.SetDestination(hero.position);
+            // Hero's transform sits at CharacterController center, ~1m above the NavMesh.
+            if (NavMesh.SamplePosition(hero.position, out NavMeshHit target, 2f, NavMesh.AllAreas))
+                agent.SetDestination(target.position);
             animator.SetBool("IsMoving", agent.velocity.magnitude > 0.1f);
         }
     }

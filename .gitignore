@@ -46,3 +46,6 @@ sysinfo.txt
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Graphify
+graphify-out/
